@@ -1,0 +1,112 @@
+.day {
+  position: relative;
+  padding: 8px;
+  height: 120px;
+  color: map-get($gray-scale, 8);
+
+  &--today {
+    color: map-get($gray-scale, 1);
+    background: map-get($gray-scale, 1);
+  }
+
+  &--default {
+    background: map-get($gray-scale, 1);
+  }
+
+  &--past {
+    background: map-get($gray-scale, 2);
+    opacity: 0.7;
+  }
+
+  &--blocked {
+    background: map-get($gray-scale, 2);
+    opacity: 0.7;
+  }
+
+  &--closed {
+    background: map-get($gray-scale, 2);
+    opacity: 0.7;
+  }
+
+  &--othermonth {
+    background: map-get($gray-scale, 2);
+    opacity: 0.7;
+    filter: blur(0.7px);
+  }
+
+  &__content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__number__container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__number {
+    font-size: 28px;
+    line-height: 36px;
+    font-weight: 500;
+    z-index: 2;
+  }
+
+  &__today__text {
+    font-size: 14px;
+    line-height: 29px;
+    font-weight: 600;
+    color: $color-primary;
+  }
+
+  &__top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 36px;
+    width: 100%;
+  }
+
+  &__status {
+    height: 20px;
+    padding: 5px 6px;
+    border-radius: 100px;
+    background-color: $color-border;
+    font-size: 14px;
+    line-height: 24px;
+    color: $color-text-status;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: capitalize;
+  }
+
+  &__appointments {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &__more {
+      font-size: 13px;
+      line-height: 16px;
+      font-weight: 500;
+      color: $color-primary;
+
+      &--disabled {
+        color: map-get($gray-scale, 7);
+      }
+    }
+  }
+
+  &__today {
+    position: absolute;
+    height: 51px;
+    z-index: 1; // Меньше чем у числа (z-index: 11)
+    top: 0;
+    left: 0;
+  }
+}

@@ -1,0 +1,19 @@
+.app {
+  background: $color-bg;
+  height: 100%;
+  
+  .content{
+    width: $container-width;
+    margin: auto;
+    margin-top: 52px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    border: 1px solid $color-bg;
+
+    &__header{
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+}

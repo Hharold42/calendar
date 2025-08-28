@@ -1,0 +1,53 @@
+.appointment {
+  position: relative;
+  height: 24px;
+  padding: 4px 6px 6px 6px;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  
+  gap: 4px;
+  overflow: hidden;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 13px;
+  letter-spacing: 0px;
+  color: $color-text-time;
+
+  @each $name, $colors in $appointments {
+    &--#{$name} {
+      background: map-get($colors, bg);
+      //   border-left: 2px solid map-get($colors, border);
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: map-get($colors, border);
+      }
+
+      .divider {
+        width: 0px;
+        height: 100%;
+        border: 1px solid map-get($colors, divider);
+      }
+    }
+  }
+
+  &__time {
+    text-transform: lowercase;
+    white-space: nowrap; // Предотвращает перенос строк
+  }
+
+  &__name {
+
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+  }
+}

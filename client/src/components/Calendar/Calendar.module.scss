@@ -1,0 +1,83 @@
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 52px;
+  &__header {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+    padding: 3px 0;
+  }
+  &__month {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+
+    &__title {
+      @include title-text(20px, 28px);
+    }
+  }
+
+  &__tableContainer {
+    width: 100%;
+    padding: 16px 24px;
+    background: $color-white;
+    border: 1px solid var(--Gray-scale-3, #eaeaf3);
+    border-radius: 8px;
+  }
+
+  &__tableWrapper {
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid var(--Gray-scale-4, #cbcbd9);
+  }
+
+  &__table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  &__weekdays {
+    height: 40px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  &__weekday {
+    @include title-text(16px, 24px);
+    padding: 8px;
+
+    &--weekend {
+      color: $color-danger;
+    }
+  }
+
+  &__days {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+
+.calendar__table td,
+.calendar__table th {
+  border: 1px solid var(--Gray-scale-4, #cbcbd9);
+}
+
+/* убираем внешние границы */
+.calendar__table tr:first-child td {
+  border-top: none;
+}
+.calendar__table tr:last-child td {
+  border-bottom: none;
+}
+.calendar__table td:first-child {
+  border-left: none;
+}
+.calendar__table td:last-child {
+  border-right: none;
+}
