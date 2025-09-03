@@ -11,7 +11,7 @@ export const getDayStatuses = (year: number, month: number) =>
   http.get<GetDayStatusesResponse>('/day-statuses', { year, month })
 
 export const getAppointments = (q: GetAppointmentsQuery) =>
-  http.get<GetAppointmentsResponse>('/appointments', { params: q })
+  http.get<GetAppointmentsResponse>('/appointments', q as unknown as Record<string, unknown>)
 
 export const postAppointment = (body: CreateAppointmentRequest) =>
   http.post<CreateAppointmentResponse>('/appointments', body)

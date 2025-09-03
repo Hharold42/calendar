@@ -1,0 +1,120 @@
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 494px;
+    background-color: $color-white;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; // Добавляем flexbox
+    flex-direction: column; // Вертикальное расположение
+    
+    &--sm {
+        width: 494px;
+    }
+    &--md {
+        width: 666px;
+    }
+    &--large {
+        width: 800px;
+    }
+
+    &.animating {
+        transform: translateX(0);
+    }
+
+    &__header {
+        width: 100%;
+        height: 72px;
+        border-bottom: 1px solid map-get($gray-scale, 3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 32px;
+        flex-shrink: 0; // Заголовок не сжимается
+    }
+
+    &__title {
+        color: map-get($gray-scale, 7);
+        @include title-text(24px, 40px);
+    }
+
+
+    &__icons {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+
+        .reset {
+            color: $color-primary;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            @include button-text;
+        }
+    }
+
+    &__content {
+        padding: 16px 32px;
+        flex: 1; // Контент занимает все доступное пространство
+        min-height: 0; // Важно для flexbox
+        overflow: hidden; // Скрываем overflow, скролл будет в форме
+    }
+
+    &__wrapper {
+        z-index: 1000;
+        position: fixed;
+        inset: 0;
+        backdrop-filter: blur(4px);
+        background: #2F2F2F33;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        &.visible {
+            opacity: 1;
+            visibility: visible;
+            
+            .drawer {
+                transform: translateX(0);
+            }
+        }
+    }
+}
+
+// Медиа-запросы для мобильных устройств
+@media (max-width: 768px) {
+    .drawer {
+        width: 100% !important; // На мобильных drawer занимает всю ширину
+        right: 0;
+        
+        &__header {
+            padding: 16px 20px; // Уменьшаем отступы на мобильных
+        }
+        
+        &__content {
+            padding: 16px 20px; // Уменьшаем отступы на мобильных
+        }
+    }
+}
+
+// Медиа-запросы для планшетов
+@media (min-width: 769px) and (max-width: 1024px) {
+    .drawer {
+        &--sm {
+            width: 80vw; // На планшетах используем viewport width
+            max-width: 600px;
+        }
+        &--md {
+            width: 85vw;
+            max-width: 700px;
+        }
+        &--large {
+            width: 90vw;
+            max-width: 800px;
+        }
+    }
+}

@@ -1,17 +1,17 @@
-import { useMemo, type JSX } from "react";
+import { useMemo, type JSX, memo } from "react";
 import type { CalendarCellProps } from "../Calendar.types";
 import styles from "./CalendarCell.module.scss";
 import AppointmentComponent from "./Appointment/Appointment";
 import today from "../../../assets/today.png";
 import getTextWidth from "@/utils/getTextWidth";
 
-const CalendarCell = ({ cell }: { cell: CalendarCellProps }): JSX.Element => {
+const CalendarCell = memo(({ cell }: { cell: CalendarCellProps }): JSX.Element => {
   const variant = useMemo(() => {
     if (!cell.inCurrentMonth) return "othermonth";
+    if (cell.isToday) return "today";
     if (cell.status === "blocked") return "blocked";
     if (cell.status === "closed") return "closed";
     if (cell.isPast) return "past";
-    if (cell.isToday) return "today";
     return "default";
   }, [cell.inCurrentMonth, cell.status, cell.isPast, cell.isToday]);
 
@@ -84,6 +84,6 @@ const CalendarCell = ({ cell }: { cell: CalendarCellProps }): JSX.Element => {
       )}
     </td>
   );
-};
+});
 
 export default CalendarCell;

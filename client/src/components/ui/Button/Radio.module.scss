@@ -1,0 +1,54 @@
+.radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid map-get($gray-scale, 3);
+  padding: 13px 16px;
+  height: 46px;
+
+  &--active {
+    border-color: map-get($primary, 5);
+  }
+
+  &__input {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #898989;
+    border-radius: 50%;
+    background-color: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+
+    &:checked {
+      border-color: #3A75BB;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #3A75BB;
+      }
+    }
+
+    &:hover {
+      border-color: #3A75BB;
+    }
+  }
+
+  &__label {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    color: map-get($gray-scale, 8);
+    cursor: pointer;
+  }
+}

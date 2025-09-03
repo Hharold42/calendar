@@ -30,11 +30,12 @@ export interface GetAppointmentsResponse { data: Appointment[]; total: number }
 
 export interface CreateAppointmentRequest {
   at: string
-  serviceId: string
-  masterId: string
+  service: string
+  master: string
   customerName: string
   notes?: string | null
-  status: 'new' | 'confirmed' | 'paid'
+  status: AppointmentStatus
+  time: string
 }
 export interface CreateAppointmentResponse { data: Appointment }
 

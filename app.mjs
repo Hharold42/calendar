@@ -1,33 +1,33 @@
-import express from 'express'
-import { v4 as uuidv4 } from 'uuid'
-import { faker } from '@faker-js/faker'
-import seedrandom from 'seedrandom'
-import cors from 'cors'
+import express from "express";
+import { v4 as uuidv4 } from "uuid";
+import { faker } from "@faker-js/faker";
+import seedrandom from "seedrandom";
+import cors from "cors";
 
-const app = express()
-const PORT = 4000
+const app = express();
+const PORT = 4000;
 
 app.use(
   cors({
-    allowedHeaders: '*',
-    origin: 'http://localhost:3000',
+    allowedHeaders: "*",
+    origin: "http://localhost:3000",
   })
-)
-app.use(express.json())
+);
+app.use(express.json());
 
 // ===== Types =====
-let services = []
-let masters = []
-let appointments = []
+let services = [];
+let masters = [];
+let appointments = [];
 
 function getDayStatus(date) {
-  const normalizedDate = new Date(date)
-  const rng = seedrandom(normalizedDate.toISOString())
+  const normalizedDate = new Date(date);
+  const rng = seedrandom(normalizedDate.toISOString());
 
-  const weekDay = normalizedDate.getDay()
-  if (weekDay === 0 || weekDay === 6) return 'closed'
-  if (rng() < 0.1) return 'blocked'
-  return 'working'
+  const weekDay = normalizedDate.getDay();
+  if (weekDay === 0 || weekDay === 6) return "closed";
+  if (rng() < 0.1) return "blocked";
+  return "working";
 }
 
 // ===== Mock Data Generation =====
@@ -36,120 +36,187 @@ function generateMockData() {
   services = Array.from({ length: 25 }, () => ({
     id: uuidv4(),
     name: faker.commerce.productName(),
-  }))
+  }));
 
   // Generate Masters
   masters = Array.from({ length: 8 }, () => {
-    const masterServices = faker.helpers.shuffle(services).slice(0, 3)
+    const masterServices = faker.helpers.shuffle(services).slice(0, 3);
     return {
       id: uuidv4(),
       name: faker.person.fullName(),
       avatarUrl: faker.image.avatar(),
       services: masterServices,
-    }
-  })
+    };
+  });
 
   // Generate Appointments
   appointments = Array.from({ length: 50 }, () => {
-    const master = randomElement(masters)
-    const service = randomElement(master.services)
-    const possibleStatuses = ['new', 'cancelled', 'paid', 'confirmed']
+    const master = randomElement(masters);
+    const service = randomElement(master.services);
+    const possibleStatuses = ["new", "cancelled", "paid", "confirmed"];
 
-    const monthAfter = new Date()
-    monthAfter.setMonth(new Date().getMonth() + 1)
+    const monthAfter = new Date();
+    monthAfter.setMonth(new Date().getMonth() + 1);
 
     return {
       id: uuidv4(),
       customerName: faker.person.fullName(),
-      at: faker.date.between({ from: new Date(), to: monthAfter }).toISOString(),
+      at: faker.date
+        .between({ from: new Date(), to: monthAfter })
+        .toISOString(),
       service,
       master,
       notes: Math.random() < 0.3 ? faker.lorem.sentence() : null,
       status: randomElement(possibleStatuses),
-    }
+    };
   }).filter((appointment) => {
-    const dayStatus = getDayStatus(appointment.at)
-    return dayStatus === 'working'
-  })
+    const dayStatus = getDayStatus(appointment.at);
+    return dayStatus === "working";
+  });
 }
 
-generateMockData()
+generateMockData();
 
 // ===== Helpers =====
 function paginate(array, page = 1, perPage = 10) {
-  const offset = (page - 1) * perPage
-  return array.slice(offset, offset + perPage)
+  const offset = (page - 1) * perPage;
+  const result = array.slice(offset, offset + perPage);
+  return result;
 }
 
 function randomElement(array) {
-  return array[Math.floor(Math.random() * array.length)]
+  return array[Math.floor(Math.random() * array.length)];
 }
 
 function isValidDate(date) {
-  return date instanceof Date && !isNaN(date)
+  return date instanceof Date && !isNaN(date);
 }
 
 // ===== Endpoints =====
 
 // GET /services
-app.get('/services', (req, res) => {
-  const { search = '' } = req.query
-  const filtered = services.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()))
-  res.json({ data: filtered })
-})
+app.get("/services", (req, res) => {
+  const { search = "" } = req.query;
+  const filtered = services.filter((s) =>
+    s.name.toLowerCase().includes(search.toLowerCase())
+  );
+  res.json({ data: filtered });
+});
 
 // GET /masters
-app.get('/masters', (req, res) => {
-  const { search = '' } = req.query
-  const filtered = masters.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()))
-  res.json({ data: filtered })
-})
+app.get("/masters", (req, res) => {
+  const { search = "" } = req.query;
+  const filtered = masters.filter((m) =>
+    m.name.toLowerCase().includes(search.toLowerCase())
+  );
+  res.json({ data: filtered });
+});
 
 // GET /appointments
-app.get('/appointments', (req, res) => {
-  const { since, until, serviceIds, masterIds, search = '', page = 1, perPage = 10 } = req.query
+app.get("/appointments", (req, res) => {
+  // console.log(JSON.stringify(req.query));
 
-  let filtered = [...appointments]
+  const {
+    since,
+    until,
+    serviceIds,
+    masterIds,
+    search = "",
+    page = 1,
+    perPage = 1000,
+  } = req.query;
 
-  if (since) filtered = filtered.filter((a) => new Date(a.at) >= new Date(since))
-  if (until) filtered = filtered.filter((a) => new Date(a.at) <= new Date(until))
+  console.log("🔍 Parsed params:", {
+    since,
+    until,
+    serviceIds,
+    masterIds,
+    search,
+    page,
+    perPage,
+  });
+
+  let filtered = [...appointments];
+
+  if (since)
+    filtered = filtered.filter((a) => new Date(a.at) >= new Date(since));
+  if (until)
+    filtered = filtered.filter((a) => new Date(a.at) <= new Date(until));
   if (serviceIds) {
-    const ids = Array.isArray(serviceIds) ? serviceIds : [serviceIds]
-    filtered = filtered.filter((a) => ids.includes(a.service.id))
+    const ids = Array.isArray(serviceIds) ? serviceIds : [serviceIds];
+    filtered = filtered.filter((a) => ids.includes(a.service.id));
   }
   if (masterIds) {
-    const ids = Array.isArray(masterIds) ? masterIds : [masterIds]
-    filtered = filtered.filter((a) => ids.includes(a.master.id))
+    const ids = Array.isArray(masterIds) ? masterIds : [masterIds];
+    filtered = filtered.filter((a) => ids.includes(a.master.id));
   }
   if (search) {
-    filtered = filtered.filter((a) => a.customerName.toLowerCase().includes(search.toLowerCase()))
+    filtered = filtered.filter((a) =>
+      a.customerName.toLowerCase().includes(search.toLowerCase())
+    );
   }
 
-  filtered = filtered.sort((a, b) => new Date(a.at) - new Date(b.at))
+  // Сортируем по дате (новые записи в конце) и по ID (для стабильности)
+  filtered = filtered.sort((a, b) => {
+    const dateA = new Date(a.at);
+    const dateB = new Date(b.at);
+    if (dateA.getTime() === dateB.getTime()) {
+      return a.id.localeCompare(b.id); // Если даты одинаковые, сортируем по ID
+    }
+    return dateA - dateB;
+  });
+
+  const paginatedData = paginate(filtered, +page, +perPage);
 
   res.json({
-    data: paginate(filtered, +page, +perPage),
+    data: paginatedData,
     total: filtered.length,
-  })
-})
+  });
+});
 
 // POST /appointments
-app.post('/appointments', (req, res) => {
-  const { at, serviceId, masterId, customerName, notes = null, status } = req.body
+app.post("/appointments", (req, res) => {
+  const {
+    at,
+    serviceId,
+    masterId,
+    customerName,
+    notes = null,
+    status,
+  } = req.body;
 
-  const service = services.find((s) => s.id === serviceId)
-  const master = masters.find((m) => m.id === masterId)
+  const service = services.find((s) => s.id === serviceId);
+  const master = masters.find((m) => m.id === masterId);
+
+  // Логируем доступные services и masters для отладки
+  if (!service) {
+    console.log(
+      "Available services:",
+      services.map((s) => ({ id: s.id, name: s.name }))
+    );
+  }
+  if (!master) {
+    console.log(
+      "Available masters:",
+      masters.map((m) => ({ id: m.id, name: m.name }))
+    );
+  }
 
   if (!service || !master) {
-    return res.status(400).json({ error: 'Invalid serviceId or masterId' })
+    console.log("ERROR: Invalid serviceId or masterId");
+    return res.status(400).json({ error: "Invalid serviceId or masterId" });
   }
 
   if (!customerName) {
-    return res.status(400).json({ error: 'Missing customerName' })
+    console.log("ERROR: Missing customerName");
+    return res.status(400).json({ error: "Missing customerName" });
   }
 
-  if (!isValidDate(new Date(at))) {
-    return res.status(400).json({ error: 'Invalid at' })
+  const dateObj = new Date(at);
+
+  if (!isValidDate(dateObj)) {
+    console.log("ERROR: Invalid at");
+    return res.status(400).json({ error: "Invalid at" });
   }
 
   const newAppointment = {
@@ -160,35 +227,35 @@ app.post('/appointments', (req, res) => {
     customerName,
     notes,
     status,
-  }
+  };
 
-  appointments.push(newAppointment)
+  appointments.push(newAppointment);
 
-  res.status(201).json({ data: newAppointment })
-})
+  res.status(201).json({ data: newAppointment });
+});
 
 // GET /day-statuses
-app.get('/day-statuses', (req, res) => {
-  const { year, month } = req.query
+app.get("/day-statuses", (req, res) => {
+  const { year, month } = req.query;
 
   if (year === undefined || month === undefined) {
-    return res.status(400).json({ error: 'Missing year or month' })
+    return res.status(400).json({ error: "Missing year or month" });
   }
 
-  const daysInMonth = new Date(year, parseInt(month) + 1, 0).getDate()
-  const monthStart = new Date(year, parseInt(month), 1)
-  monthStart.setHours(0, 0, 0, 0)
+  const daysInMonth = new Date(year, parseInt(month) + 1, 0).getDate();
+  const monthStart = new Date(year, parseInt(month), 1);
+  monthStart.setHours(0, 0, 0, 0);
 
   const statuses = Array.from({ length: daysInMonth }, (_, index) => {
-    const date = new Date(monthStart)
-    date.setDate(index + 1)
-    return getDayStatus(date)
-  })
+    const date = new Date(monthStart);
+    date.setDate(index + 1);
+    return getDayStatus(date);
+  });
 
-  res.json({ data: statuses })
-})
+  res.json({ data: statuses });
+});
 
 // ===== Start Server =====
 app.listen(PORT, () => {
-  console.log(`Mock API server is running at http://localhost:${PORT}`)
-})
+  console.log(`Mock API server is running at http://localhost:${PORT}`);
+});

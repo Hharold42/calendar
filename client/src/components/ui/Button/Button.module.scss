@@ -7,6 +7,19 @@
   color: $color-text-secondary;
   height: 44px;
   border: 1px solid $color-primary;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: darken($color-primary, 10%);
+    border-color: darken($color-primary, 10%);
+  }
+
+  &:disabled {
+    background: map-get($gray-scale, 4);
+    border-color: map-get($gray-scale, 4);
+    color: map-get($gray-scale, 6);
+    cursor: not-allowed;
+  }
 }
 
 .secondary {
@@ -18,4 +31,16 @@
   color: $color-text;
   height: 38px;
   border: 1px solid $color-text;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: map-get($gray-scale, 1);
+  }
+
+  &:disabled {
+    background: map-get($gray-scale, 2);
+    border-color: map-get($gray-scale, 4);
+    color: map-get($gray-scale, 6);
+    cursor: not-allowed;
+  }
 }

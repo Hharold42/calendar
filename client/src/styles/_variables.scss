@@ -9,13 +9,30 @@ $color-border-secondary: #cbcbd9;
 $color-text-day: #2f2f2f;
 $color-text-time: #222222;
 $color-text-status: #484848;
+$color-input-border: #6d717f;
 
 $gray-scale: (
   1: #ffffff,
   2: #f8f8fb,
   3: #eaeaf3,
   4: #cbcbd9,
+  5: #acacb3,
+  6: #898989,
   7: #484848,
+  8: #2f2f2f,
+  9: #222222,
+);
+
+$primary: (
+  1: #eff5fb,
+  3: #b3d5fd,
+  4: #5793db,
+  5: #3a75bb,
+  6: #215491,
+);
+
+$red: (
+  6: #cb4123,
 );
 
 //appointments

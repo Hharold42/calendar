@@ -1,0 +1,40 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  height: 100%; // Занимаем всю высоту drawer
+  min-height: 0; // Важно для flexbox
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    flex: 1; // Контент занимает все доступное пространство
+    width: 100%;
+    gap: 32px;
+    overflow-y: auto; // Скролл если контент не помещается
+    padding-bottom: 16px; // Небольшой отступ снизу
+  }
+
+  &__line {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    // height: 68px;
+  }
+
+  &__icon {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: map-get($primary, 1);
+    border-radius: 6px;
+    padding: 14px 6px;
+  }
+
+  // Кнопка теперь в flexbox структуре, а не абсолютно позиционирована
+  button {
+    margin-top: auto; // Кнопка прижимается к низу
+    width: 100%;
+    flex-shrink: 0; // Кнопка не сжимается
+  }
+}

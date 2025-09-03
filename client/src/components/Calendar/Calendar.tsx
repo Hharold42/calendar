@@ -4,13 +4,12 @@ import styles from "./Calendar.module.scss";
 import Button from "../ui/Button/Button";
 import Icon from "../ui/Icon/Icon";
 import CalendarCell from "./Cell/CalendarCell.tsx";
+import { useCallback, useMemo, memo } from "react";
 
 function makeMatrix(year: number, month: number) {
   const first = new Date(year, month, 1);
   const start = new Date(first);
-  // start.getDay() возвращает 0 для воскресенья, 1 для понедельника и т.д.
-  // Нам нужно найти предыдущее воскресенье
-  const offset = start.getDay(); // 0 = воскресенье, 1 = понедельник, и т.д.
+  const offset = start.getDay();
   start.setDate(first.getDate() - offset);
 
   const cells: Date[] = Array.from({ length: 42 }, (_, i) => {
@@ -46,63 +45,71 @@ function serializeMonthToWeeks(
   return weeks;
 }
 
-const Calendar = ({
+const Calendar = memo(({
   year,
   month,
   statuses,
   appointments,
   onDayClick,
   onMonthChange,
+  onFilterClick,
 }: CalendarProps) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = useMemo(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }, []);
 
-  const go = (delta: number) => {
+  const go = useCallback((delta: number) => {
     const d = new Date(year, month + delta, 1);
     onMonthChange(d.getFullYear(), d.getMonth());
-  };
+  }, [year, month, onMonthChange]);
 
-  const cells: CalendarCellProps[] = makeMatrix(year, month).map((d) => {
-    const inMonth = d.getMonth() === month;
-    const isToday = sameDay(d, today);
-    const d0 = new Date(d);
-    d0.setHours(0, 0, 0, 0);
-    const isPast = d0 < today;
+  const cells: CalendarCellProps[] = useMemo(() => {
+    return makeMatrix(year, month).map((d) => {
+      const inMonth = d.getMonth() === month;
+      const isToday = sameDay(d, today);
+      const d0 = new Date(d);
+      d0.setHours(0, 0, 0, 0);
+      const isPast = d0 < today;
 
-    // Находим статус для любого дня на календаре
-    let status: DayStatus | undefined;
-    if (statuses) {
-      if (d.getMonth() === month) {
-        // Текущий месяц - сдвигаем на +1 день
-        status = statuses.current?.[d.getDate() - 1];
-      } else if (
-        d.getMonth() === month - 1 ||
-        (month === 0 && d.getMonth() === 11)
-      ) {
-        status = statuses.previous?.[d.getDate() - 1];
-      } else if (
-        d.getMonth() === month + 1 ||
-        (month === 11 && d.getMonth() === 0)
-      ) {
-        // Следующий месяц - сдвигаем на +1 день
-        status = statuses.next?.[d.getDate() - 1];
+      // Находим статус для любого дня на календаре
+      let status: DayStatus | undefined;
+      if (statuses) {
+        if (d.getMonth() === month) {
+          // Текущий месяц - сдвигаем на +1 день
+          status = statuses.current?.[d.getDate() - 1];
+        } else if (
+          d.getMonth() === month - 1 ||
+          (month === 0 && d.getMonth() === 11)
+        ) {
+          status = statuses.previous?.[d.getDate() - 1];
+        } else if (
+          d.getMonth() === month + 1 ||
+          (month === 11 && d.getMonth() === 0)
+        ) {
+          // Следующий месяц - сдвигаем на +1 день
+          status = statuses.next?.[d.getDate() - 1];
+        }
       }
-    }
-    const dayAppointments = (appointments ?? []).filter((a) =>
-      sameDay(new Date(a.at), d)
-    );
+      const dayAppointments = (appointments ?? []).filter((a) =>
+        sameDay(new Date(a.at), d)
+      );
 
-    return {
-      date: d,
-      inCurrentMonth: inMonth,
-      isToday,
-      isPast,
-      status,
-      appointments: dayAppointments,
-    };
-  });
+      return {
+        date: d,
+        inCurrentMonth: inMonth,
+        isToday,
+        isPast,
+        status,
+        appointments: dayAppointments,
+      };
+    });
+  }, [year, month, today, statuses, appointments]);
 
-  const weeks = serializeMonthToWeeks(cells);
+  const weeks = useMemo(() => {
+    return serializeMonthToWeeks(cells);
+  }, [cells]);
 
   return (
     <div className={styles.calendar}>
@@ -124,6 +131,7 @@ const Calendar = ({
         <Button
           variant="secondary"
           icon={<Icon id="filter" color="white" size={24} />}
+          onClick={onFilterClick}
         >
           Filters
         </Button>
@@ -171,6 +179,6 @@ const Calendar = ({
       </div>
     </div>
   );
-};
+});
 
 export default Calendar;

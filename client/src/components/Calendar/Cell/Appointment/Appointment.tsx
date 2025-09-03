@@ -1,8 +1,9 @@
 import type { JSX } from "react";
 import type { Appointment } from "../../../../api/types";
 import styles from "./Appointment.module.scss";
+import { memo } from "react";
 
-const AppointmentComponent = ({
+const AppointmentComponent = memo(({
   appointment,
   disabled,
 }: {
@@ -26,9 +27,9 @@ const AppointmentComponent = ({
     >
       <div className={styles.appointment__time}>{time12}</div>
       <div className={styles.divider}></div>
-      <div className={styles.appointment__name}>{appointment.customerName}</div>
+      <div className={styles.appointment__name}>{appointment.master.name}</div>
     </div>
   );
-};
+});
 
 export default AppointmentComponent;

@@ -7,6 +7,7 @@ export interface CalendarProps {
   appointments?: Appointment[] | null
   onDayClick?: (date: Date) => void
   onMonthChange: (year: number, month: number) => void
+  onFilterClick?: () => void
 }
 
 export interface CalendarCellProps {
