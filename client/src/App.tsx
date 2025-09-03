@@ -21,6 +21,7 @@ export default function App(): JSX.Element {
   const [isDrawerOpen, setIsDrawerOpen] = useState<
     "addEvent" | "filter" | null
   >(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [filters, setFilters] = useState<CalendarFilters>({
     masterIds: [],
     serviceIds: [],
@@ -31,7 +32,15 @@ export default function App(): JSX.Element {
     addEvent: {
       title: "New event",
       size: "md",
-      form: <NewEventForm onSuccess={() => setIsDrawerOpen(null)} />,
+      form: (
+        <NewEventForm 
+          onSuccess={() => {
+            setIsDrawerOpen(null);
+            setSelectedDate(null);
+          }}
+          initialDate={selectedDate}
+        />
+      ),
     },
     filter: {
       title: "Filters",
@@ -54,6 +63,12 @@ export default function App(): JSX.Element {
 
   const handleDrawerClose = useCallback(() => {
     setIsDrawerOpen(null);
+    setSelectedDate(null);
+  }, []);
+
+  const handleDayClick = useCallback((date: Date) => {
+    setSelectedDate(date);
+    setIsDrawerOpen("addEvent");
   }, []);
 
   const [ym, setYm] = useState({
@@ -91,7 +106,7 @@ export default function App(): JSX.Element {
             month={ym.month}
             statuses={statuses}
             appointments={appointments}
-            onDayClick={() => {}}
+            onDayClick={handleDayClick}
             onMonthChange={handleMonthChange}
             onFilterClick={() => handleDrawerOpen("filter")}
           />

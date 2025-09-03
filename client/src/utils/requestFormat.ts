@@ -7,13 +7,18 @@ export default function requestFormat(data: any) {
     dateOnly = at.split('T')[0]; // Получаем только дату "2025-09-02"
   }
   
-  // Проверяем формат даты
-  if (!dateOnly.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    throw new Error(`Invalid date format: ${dateOnly}. Expected format: YYYY-MM-DD`);
+  // Проверяем формат даты и конвертируем MM/DD/YYYY в YYYY-MM-DD
+  let dateObj;
+  if (dateOnly.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+    // Формат MM/DD/YYYY
+    const [month, day, year] = dateOnly.split('/').map(Number);
+    dateObj = new Date(year, month - 1, day);
+  } else if (dateOnly.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    // Формат YYYY-MM-DD
+    dateObj = new Date(dateOnly + 'T00:00:00');
+  } else {
+    throw new Error(`Invalid date format: ${dateOnly}. Expected format: MM/DD/YYYY or YYYY-MM-DD`);
   }
-  
-  // Создаем объект Date из строки даты (только дата, без времени)
-  const dateObj = new Date(dateOnly + 'T00:00:00'); // Устанавливаем начало дня в локальном времени
   // Проверяем, что дата валидна
   if (isNaN(dateObj.getTime())) {
     throw new Error(`Invalid date: ${dateOnly}`);

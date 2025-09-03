@@ -44,7 +44,7 @@ export default function MultiSelect({
           onChange={(e) => setQuery(e.target.value)}
         />
       </div>
-      <div className={styles["multi-select__options"]}>
+      <div className={styles["multi-select__options"] + " " + styles.scrollable}>
         {filteredOptions.map((option) => (
           <Checkbox
             key={option.value}

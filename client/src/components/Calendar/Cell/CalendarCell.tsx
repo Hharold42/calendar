@@ -5,7 +5,13 @@ import AppointmentComponent from "./Appointment/Appointment";
 import today from "../../../assets/today.png";
 import getTextWidth from "@/utils/getTextWidth";
 
-const CalendarCell = memo(({ cell }: { cell: CalendarCellProps }): JSX.Element => {
+const CalendarCell = memo(({ 
+  cell, 
+  onDayClick 
+}: { 
+  cell: CalendarCellProps;
+  onDayClick?: (date: Date) => void;
+}): JSX.Element => {
   const variant = useMemo(() => {
     if (!cell.inCurrentMonth) return "othermonth";
     if (cell.isToday) return "today";
@@ -16,8 +22,13 @@ const CalendarCell = memo(({ cell }: { cell: CalendarCellProps }): JSX.Element =
   }, [cell.inCurrentMonth, cell.status, cell.isPast, cell.isToday]);
 
   const isDisabled = useMemo(
-    () => cell.isPast || !cell.inCurrentMonth,
-    [cell.isPast, cell.inCurrentMonth]
+    () => cell.isPast || !cell.inCurrentMonth || cell.status === "blocked" || cell.status === "closed",
+    [cell.isPast, cell.inCurrentMonth, cell.status]
+  );
+
+  const isClickable = useMemo(
+    () => cell.inCurrentMonth && !cell.isPast && cell.status !== "blocked" && cell.status !== "closed",
+    [cell.inCurrentMonth, cell.isPast, cell.status]
   );
 
   // Динамически вычисляем размер и позицию картинки
@@ -38,8 +49,18 @@ const CalendarCell = memo(({ cell }: { cell: CalendarCellProps }): JSX.Element =
     };
   }, [cell.isToday, cell.date]);
 
+  const handleClick = () => {
+    if (isClickable && onDayClick) {
+      onDayClick(cell.date);
+    }
+  };
+
   return (
-    <td className={`${styles.day} ${styles[`day--${variant}`]}`}>
+    <td 
+      className={`${styles.day} ${styles[`day--${variant}`]} ${isClickable ? styles['day--clickable'] : ''}`}
+      onClick={handleClick}
+      style={{ cursor: isClickable ? 'pointer' : 'default' }}
+    >
       <div className={styles.day__content}>
         <div className={styles.day__top}>
           <div className={styles.day__number__container}>

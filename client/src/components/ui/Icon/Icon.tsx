@@ -61,13 +61,16 @@ export default memo(function Icon({
   return (
     <Suspense fallback={null}>
       <div
-        style={
-          stroke
-            ? ({
-                "--icon-stroke": stroke,
-              } as React.CSSProperties)
-            : undefined
-        }
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: size,
+          height: size,
+          ...(stroke && {
+            "--icon-stroke": stroke,
+          } as React.CSSProperties),
+        }}
         className={stroke ? "icon-with-stroke" : undefined}
       >
         <LazyIcon {...svgProps} />

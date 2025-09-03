@@ -3,8 +3,12 @@ import DrawerForm from "./DrawerFrom";
 import styles from "./Form.module.scss";
 import Icon from "../ui/Icon/Icon";
 import Field from "./Fields/Field";
-import { useCachedServices, useCachedMasters, useCreateAppointment } from "../../api/queries";
-import { useState } from "react";
+import {
+  useCachedServices,
+  useCachedMasters,
+  useCreateAppointment,
+} from "../../api/queries";
+import { useState, useEffect } from "react";
 import type {
   AppointmentStatus,
   CreateAppointmentRequest,
@@ -12,20 +16,36 @@ import type {
 import Radio from "../ui/Button/Radio";
 import TextareaField from "./Fields/TextareaField";
 import requestFormat from "../../utils/requestFormat";
-import { validateRequiredFields, hasNoErrors } from "../../utils/formValidation";
+import {
+  validateRequiredFields,
+  hasNoErrors,
+} from "../../utils/formValidation";
 
 type NewEventFormProps = {
   onSuccess?: () => void;
+  initialDate?: Date | null;
 };
 
-export default function NewEventForm({ onSuccess }: NewEventFormProps): JSX.Element {
+export default function NewEventForm({
+  onSuccess,
+  initialDate,
+}: NewEventFormProps): JSX.Element {
   const [formData, setFormData] = useState<CreateAppointmentRequest>({
     customerName: "",
     service: "",
     master: "",
     at: (() => {
+      if (initialDate) {
+        const month = String(initialDate.getMonth() + 1).padStart(2, "0");
+        const day = String(initialDate.getDate()).padStart(2, "0");
+        const year = initialDate.getFullYear();
+        return `${month}/${day}/${year}`;
+      }
       const today = new Date();
-      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
+      const year = today.getFullYear();
+      return `${month}/${day}/${year}`;
     })(),
     time: (() => {
       const now = new Date();
@@ -41,6 +61,20 @@ export default function NewEventForm({ onSuccess }: NewEventFormProps): JSX.Elem
     notes: "",
   });
 
+  // Обновляем дату при изменении initialDate
+  useEffect(() => {
+    if (initialDate) {
+      const month = String(initialDate.getMonth() + 1).padStart(2, "0");
+      const day = String(initialDate.getDate()).padStart(2, "0");
+      const year = initialDate.getFullYear();
+      const dateString = `${month}/${day}/${year}`;
+      setFormData((prev) => ({
+        ...prev,
+        at: dateString,
+      }));
+    }
+  }, [initialDate]);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { data: services } = useCachedServices();
@@ -49,11 +83,11 @@ export default function NewEventForm({ onSuccess }: NewEventFormProps): JSX.Elem
   const createAppointmentMutation = useCreateAppointment();
 
   const requiredFields: (keyof CreateAppointmentRequest)[] = [
-    'customerName',
-    'service', 
-    'master',
-    'at',
-    'time'
+    "customerName",
+    "service",
+    "master",
+    "at",
+    "time",
   ];
 
   const validateForm = (): boolean => {
@@ -67,14 +101,13 @@ export default function NewEventForm({ onSuccess }: NewEventFormProps): JSX.Elem
     if (!validateForm()) {
       return;
     }
-    
+
     try {
       const formattedData = requestFormat(formData);
-      
+
       await createAppointmentMutation.mutateAsync(formattedData);
-   
+
       onSuccess?.();
-      
     } catch (error) {
       console.error("Error creating appointment:", error);
       alert("Ошибка при создании записи: " + (error as Error).message);
@@ -97,33 +130,40 @@ export default function NewEventForm({ onSuccess }: NewEventFormProps): JSX.Elem
     >
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Очищаем ошибку для этого поля
     if (errors[name]) {
-      const newErrors = { ...errors };
-      delete newErrors[name];
-      setErrors(newErrors);
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
     }
   };
 
   const handleRadioChange = (status: AppointmentStatus) => {
-    setFormData({ ...formData, status });
+    setFormData((prev) => ({
+      ...prev,
+      status,
+    }));
   };
 
   return (
-    <DrawerForm 
-      buttonText={createAppointmentMutation.isPending ? "Saving..." : "Save"} 
+    <DrawerForm
       onSubmit={handleSubmit}
       disabled={createAppointmentMutation.isPending}
     >
       <div className={styles.form__line}>
         <div className={styles.form__icon}>
-          <Icon id="users" size={20} />
+          <Icon id="user" size={20} />
         </div>
         <Field
-          label="Customer"
+          label="Customer name"
           type="text"
-          placeholder="Full name"
+          placeholder="Enter customer name"
           value={formData.customerName}
           onChange={handleChange}
           name="customerName"
@@ -136,8 +176,8 @@ export default function NewEventForm({ onSuccess }: NewEventFormProps): JSX.Elem
           placeholder="Select service"
           options={serviceOptions}
           value={formData.service}
-          name="service"
           onChange={handleChange}
+          name="service"
           required
           error={errors.service}
         />

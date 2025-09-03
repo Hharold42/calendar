@@ -4,6 +4,10 @@
   height: 120px;
   color: map-get($gray-scale, 8);
 
+  &--clickable {
+    cursor: pointer;
+  }
+
   &--today {
     color: map-get($gray-scale, 1);
     background: map-get($gray-scale, 1);
@@ -30,8 +34,7 @@
 
   &--othermonth {
     background: map-get($gray-scale, 2);
-    opacity: 0.7;
-    filter: blur(0.7px);
+    opacity: 0.5;
   }
 
   &__content {

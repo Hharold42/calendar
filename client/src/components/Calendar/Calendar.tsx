@@ -169,7 +169,11 @@ const Calendar = memo(({
               {weeks.map((week, weekIndex) => (
                 <tr key={weekIndex} className={styles.calendar__week}>
                   {week.map((cell, dayIndex) => (
-                    <CalendarCell cell={cell} key={dayIndex} />
+                    <CalendarCell 
+                      cell={cell} 
+                      key={dayIndex} 
+                      onDayClick={onDayClick}
+                    />
                   ))}
                 </tr>
               ))}

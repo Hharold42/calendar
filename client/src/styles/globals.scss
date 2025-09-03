@@ -22,35 +22,35 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-// Глобальные стили для скроллбара всей страницы
-html::-webkit-scrollbar {
-  width: 2px;
-  height: 2px;
-}
+// // Глобальные стили для скроллбара всей страницы
+// html::-webkit-scrollbar {
+//   width: 2px;
+//   height: 2px;
+// }
 
-html::-webkit-scrollbar-track {
-  background: transparent;
-}
+// html::-webkit-scrollbar-track {
+//   background: transparent;
+// }
 
-html::-webkit-scrollbar-thumb {
-  background-color: #5793db;
-  border-radius: 0;
+// html::-webkit-scrollbar-thumb {
+//   background-color: #5793db;
+//   border-radius: 0;
 
-  &:hover {
-    background-color: #5793db;
-  }
-}
+//   &:hover {
+//     background-color: #5793db;
+//   }
+// }
 
-// Убираем стрелки (кнопки) скроллбара
-html::-webkit-scrollbar-button {
-  display: none;
-}
+// // Убираем стрелки (кнопки) скроллбара
+// html::-webkit-scrollbar-button {
+//   display: none;
+// }
 
-// Для Firefox
-html {
-  scrollbar-width: thin;
-  scrollbar-color: #5793db transparent;
-}
+// // Для Firefox
+// html {
+//   scrollbar-width: thin;
+//   scrollbar-color: #5793db transparent;
+// }
 
 a {
   text-decoration: none;
@@ -88,23 +88,14 @@ td {
   text-align: left;
 }
 
-input[type="number"] {
-  /* для Chrome, Safari, Edge */
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+input {
+  font-family: "Montserrat", sans-serif;
 }
 
 .react-datepicker {
   background: map-get($gray-scale, 1) !important;
   border-radius: 8px;
-  height: 330px;
-  width: 310px;
+  width: 100%;
   padding-bottom: 15px;
   overflow: hidden;
   box-shadow: -4px 5px 8px 0px #00000012;
@@ -233,3 +224,4 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     stroke: var(--icon-stroke) !important;
   }
 }
+

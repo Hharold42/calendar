@@ -1,10 +1,7 @@
-import React, { useState } from "react";
-import DatePicker from "react-datepicker";
-import styles from "./Field.module.scss";
+import React, { useState, useRef, useEffect, type JSX } from "react";
 import FieldWrapper from "./FieldWrapper";
 import Icon from "@/components/ui/Icon/Icon";
-import { registerLocale } from "react-datepicker";
-import { enUS } from "date-fns/locale/en-US";
+import styles from "./Field.module.scss";
 
 interface DateFieldProps {
   label: string;
@@ -16,153 +13,146 @@ interface DateFieldProps {
   name?: string;
   error?: string;
 }
-type DatePickerHeaderProps = {
-  date: Date;
-  changeYear: (year: number) => void;
-  changeMonth: (month: number) => void;
-  decreaseMonth: () => void;
-  increaseMonth: () => void;
-  prevMonthButtonDisabled: boolean;
-  nextMonthButtonDisabled: boolean;
-};
 
-console.log(enUS);
-
-
-registerLocale("enUShort", {
-  ...enUS,
-  localize: {
-    ...enUS.localize,
-    day: (n: number) => {
-      const shortDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      return shortDays[n];
-    },
-    
-  },
-});
-
-const DateField: React.FC<DateFieldProps> = ({
+export default function DateField({
   label,
   value,
   onChange,
-  placeholder,
+  placeholder = "MM/DD/YYYY",
   required = false,
   disabled = false,
   name,
   error,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
+}: DateFieldProps): JSX.Element {
+  const [displayValue, setDisplayValue] = useState("");
+  const [isValid, setIsValid] = useState(true);
+  const [hasBlurred, setHasBlurred] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleDateChange = (date: Date | null) => {
-    // Сохраняем дату в формате YYYY-MM-DD как простую строку
-    const dateValue = date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : "";
+  // Инициализация displayValue при изменении value
+  useEffect(() => {
+    if (value) {
+      setDisplayValue(value);
+      setIsValid(true);
+    } else {
+      setDisplayValue("");
+      setIsValid(true);
+    }
+  }, [value]);
+
+  // Функция форматирования ввода с маской MM/DD/YYYY
+  const formatInput = (input: string) => {
+    const digits = input.replace(/\D/g, "");
+    let formatted = "";
+
+    if (digits.length >= 1) {
+      formatted = digits.substring(0, 2);
+    }
+    if (digits.length >= 3) {
+      formatted += "/" + digits.substring(2, 4);
+    }
+    if (digits.length >= 5) {
+      formatted += "/" + digits.substring(4, 8);
+    }
+
+    return formatted;
+  };
+
+  // Валидация даты в формате MM/DD/YYYY
+  const validateDate = (dateStr: string) => {
+    if (!dateStr || dateStr.length < 10) return false;
+
+    const [month, day, year] = dateStr.split("/").map(Number);
+    if (!month || !day || !year) return false;
+
+    const date = new Date(year, month - 1, day);
+    return (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day &&
+      date >= new Date()
+    );
+  };
+
+  // Проверка на неполную дату
+  const hasIncompleteDate = (dateStr: string) => {
+    if (!dateStr) return false;
+    return dateStr.length > 0 && dateStr.length < 10;
+  };
+
+  // Обработчик изменения ввода
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    const formatted = formatInput(input);
+    setDisplayValue(formatted);
+
+    const valid = validateDate(formatted);
+    setIsValid(valid);
+
+    // Сохраняем в формате MM/DD/YYYY
     const event = {
-      target: { name, value: dateValue },
-    } as unknown as React.ChangeEvent<HTMLInputElement>;
-    onChange?.(event);
-    setIsOpen(false);
+      target: { name, value: formatted },
+    } as React.ChangeEvent<HTMLInputElement>;
+    onChange(event);
   };
 
-  const formatDateForDisplay = (date: Date | null) => {
-    if (!date) return "";
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
+  // Обработчик потери фокуса
+  const handleBlur = () => {
+    setHasBlurred(true);
+    if (displayValue && (!isValid || hasIncompleteDate(displayValue))) {
+      setIsValid(false);
+    }
   };
 
-  const CustomInput = () => {
-    const dateFromInput = value && value.match(/^\d{4}-\d{2}-\d{2}$/) ? new Date(value + 'T00:00:00') : null;
-    return (
-      <div
-        tabIndex={0}
-        className={
-          styles.field__input +
-          " " +
-          (value ? styles[`field__input--filled`] : "") +
-          " " +
-          styles[`field__input--date`] +
-          " " +
-          (error ? styles[`field__input--error`] : "")
-        }
-        onClick={() => setIsOpen(true)}
-      >
-        <Icon id="calendar" size={16} />
-        {dateFromInput ? formatDateForDisplay(dateFromInput) : placeholder}
-      </div>
-    );
+  // Обработчик нажатия клавиш
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      const cursorPos = inputRef.current?.selectionStart || 0;
+      if (cursorPos > 0 && displayValue[cursorPos - 1] === "/") {
+        e.preventDefault();
+        const newValue =
+          displayValue.slice(0, cursorPos - 2) + displayValue.slice(cursorPos);
+        setDisplayValue(newValue);
+        const event = {
+          target: { name, value: newValue },
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleInputChange(event);
+      }
+    }
   };
 
-  const customHeader = ({
-    date,
-    changeMonth,
-    decreaseMonth,
-    increaseMonth,
-    prevMonthButtonDisabled,
-    nextMonthButtonDisabled,
-  }: DatePickerHeaderProps) => {
-    const monts = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-    return (
-      <div className={"customHeader"}>
-        <Icon id="chevron-left-circle" size={17} onClick={decreaseMonth} />
-        <h3>{monts[date.getMonth()]}</h3>
-        <Icon id="chevron-right-circle" size={17} onClick={increaseMonth} />
-      </div>
-    );
-  };
-
-  const dateFromInput = value && value.match(/^\d{4}-\d{2}-\d{2}$/) ? new Date(value + 'T00:00:00') : null;
+  // Определяем, есть ли ошибка
+  const hasError =
+    (hasBlurred && !isValid && displayValue) ||
+    hasIncompleteDate(displayValue) ||
+    error;
 
   return (
     <FieldWrapper label={label} required={required} error={error}>
-      <DatePicker
-        selected={dateFromInput}
-        onChange={handleDateChange}
-        open={isOpen}
-        onClickOutside={() => setIsOpen(false)}
-        dateFormat="MM/dd/yyyy"
-        placeholderText={placeholder}
-        disabled={disabled}
-        showPopperArrow={false}
-        popperPlacement="bottom-start"
-        customInput={<CustomInput />}
-        // Кастомизация внешнего вида
-        calendarClassName={styles.customDatePicker}
-        showMonthDropdown={true}
-        showYearDropdown={true}
-        dropdownMode="select"
-        yearDropdownItemNumber={10}
-        dateFormatCalendar="MMMM yyyy"
-        // Дополнительные настройки
-        minDate={new Date()}
-        maxDate={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)} // +1 год
-        excludeDates={[]} // Даты для исключения
-        highlightDates={[]} // Даты для выделения
-        // Стили для дней недели
-        dayClassName={(date) => {
-          const day = date.getDay();
-          return day === 0 || day === 6 ? "weekend-day" : "";
-        }}
-        renderCustomHeader={customHeader}
-        locale="enUShort"
-        useWeekdaysShort={true}
-    
-      />
+      <div
+        className={
+          styles.field__input +
+          " " +
+          styles[`field__input--search`] +
+          " " +
+          (displayValue ? styles[`field__input--filled`] : "") +
+          " " +
+          (hasError ? styles[`field__input--error`] : "")
+        }
+      >
+        <Icon id="calendar" size={16} />
+        <input
+          ref={inputRef}
+          type="text"
+          value={displayValue}
+          onChange={handleInputChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          disabled={disabled}
+          name={name}
+        />
+      </div>
     </FieldWrapper>
   );
-};
-
-export default DateField;
+}

@@ -45,7 +45,10 @@ export default function SelectField({
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -87,7 +90,10 @@ export default function SelectField({
         />
       </div>
       {isOpen && (
-        <div className={styles.field__options} ref={containerRef}>
+        <div
+          className={styles.field__options + " " + styles.scrollable}
+          ref={containerRef}
+        >
           {options?.map((option, i) => (
             <div
               key={i}

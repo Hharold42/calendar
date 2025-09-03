@@ -5,6 +5,7 @@
   width: 100%;
   position: relative;
   flex: 1;
+  font-family: "Montserrat", sans-serif !important;
 
   &__icon {
     @include noselect;
@@ -103,11 +104,33 @@
       gap: 8px;
       align-items: center;
       border: 1px solid map-get($gray-scale, 5);
+
+      input {
+        @include inherit-text;
+        text-align: left;
+        outline: none;
+        border: none;
+        background: transparent;
+        width: 100%;
+        height: 100%;
+      }
+
+      &::before {
+        content: "";
+        width: 16px;
+        height: 16px;
+        background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.6667 2.66667H3.33333C2.59695 2.66667 2 3.26363 2 4.00001V13.3333C2 14.0697 2.59695 14.6667 3.33333 14.6667H12.6667C13.403 14.6667 14 14.0697 14 13.3333V4.00001C14 3.26363 13.403 2.66667 12.6667 2.66667Z' stroke='%23898989' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M10.6667 1.33333V3.99999' stroke='%23898989' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M5.33325 1.33333V3.99999' stroke='%23898989' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M2 6.66667H14' stroke='%23898989' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
     }
 
     &::placeholder {
       color: map-get($gray-scale, 5);
       transition: color 0.2s ease;
+
+
     }
 
     &:hover {
@@ -122,12 +145,18 @@
 
     &:fucus-within {
       border-color: map-get($primary, 5);
+
     }
 
     &--filled {
       border-color: map-get($gray-scale, 8);
       color: map-get($gray-scale, 8);
       font-weight: 500;
+
+      input {
+        color: map-get($gray-scale, 8) !important;
+        font-weight: 500 !important;
+      }
 
       .time-field {
         color: map-get($gray-scale, 8);
@@ -366,5 +395,39 @@
     color: map-get($gray-scale, 9);
     cursor: pointer;
     user-select: none;
+  }
+}
+
+.scrollable {
+  overflow-y: auto;
+  scrollbar-width: thin; // Firefox
+  scrollbar-color: #5793db transparent;
+
+  /* Webkit */
+  &::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 0; // убираем скругление трека
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #5793db;
+    border-radius: 0 !important; // полностью прямой
+    border: none;
+    min-height: 20px;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none !important; // убираем стрелки
+    width: 0;
+    height: 0;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent; // убираем угол
   }
 }
